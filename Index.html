@@ -1,0 +1,386 @@
+<!DOCTYPE html>  <html lang="de">  
+<head>  
+  <meta charset="UTF-8">  
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">  
+  <title>Smart Wetter Ludwigsburg</title>  
+  <style>  
+    * {  
+      margin: 0;  
+      padding: 0;  
+      box-sizing: border-box;  
+    }  body {  
+  font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif;  
+  background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);  
+  height: 100vh;  
+  overflow: hidden;  
+  color: white;  
+  position: relative;  
+}  
+
+.weather-bg {  
+  position: absolute;  
+  top: 0;  
+  left: 0;  
+  width: 100%;  
+  height: 100%;  
+  background: radial-gradient(circle at 30% 40%, rgba(255,255,255,0.1) 0%, transparent 50%),  
+              radial-gradient(circle at 70% 60%, rgba(255,255,255,0.05) 0%, transparent 50%);  
+  z-index: -1;  
+}  
+
+.container {  
+  height: 100vh;  
+  display: flex;  
+  flex-direction: column;  
+  justify-content: center;  
+  align-items: center;  
+  padding: 20px;  
+  max-width: 1200px;  
+  margin: 0 auto;  
+}  
+
+.weather-card {  
+  background: rgba(255,255,255,0.15);  
+  border-radius: 30px;  
+  padding: 50px;  
+  backdrop-filter: blur(20px);  
+  border: 2px solid rgba(255,255,255,0.2);  
+  box-shadow: 0 20px 40px rgba(0,0,0,0.2);  
+  text-align: center;  
+  min-width: 500px;  
+  max-width: 600px;  
+  position: relative;  
+  overflow: hidden;  
+}  
+
+.weather-card::before {  
+  content: '';  
+  position: absolute;  
+  top: -50%;  
+  left: -50%;  
+  width: 200%;  
+  height: 200%;  
+  background: linear-gradient(45deg, transparent, rgba(255,255,255,0.1), transparent);  
+  animation: shimmer 3s infinite;  
+}  
+
+@keyframes shimmer {  
+  0% { transform: translateX(-100%) translateY(-100%) rotate(45deg); }  
+  100% { transform: translateX(100%) translateY(100%) rotate(45deg); }  
+}  
+
+.header {  
+  margin-bottom: 30px;  
+  position: relative;  
+  z-index: 1;  
+}  
+
+.header h1 {  
+  font-size: 2.5em;  
+  font-weight: 300;  
+  margin-bottom: 10px;  
+  text-shadow: 2px 2px 10px rgba(0,0,0,0.3);  
+  background: linear-gradient(45deg, #fff, #f0f0f0);  
+  -webkit-background-clip: text;  
+  -webkit-text-fill-color: transparent;  
+  background-clip: text;  
+}  
+
+.status {  
+  font-size: 1.2em;  
+  margin-bottom: 20px;  
+  opacity: 0.9;  
+  position: relative;  
+  z-index: 1;  
+}  
+
+.weather-main {  
+  display: flex;  
+  align-items: center;  
+  justify-content: center;  
+  gap: 30px;  
+  margin-bottom: 30px;  
+  position: relative;  
+  z-index: 1;  
+}  
+
+.weather-icon {  
+  font-size: 5em;  
+  animation: float 3s ease-in-out infinite;  
+  text-shadow: 0 0 20px rgba(255,255,255,0.5);  
+}  
+
+@keyframes float {  
+  0%, 100% { transform: translateY(0px); }  
+  50% { transform: translateY(-15px); }  
+}  
+
+.temperature {  
+  font-size: 4.5em;  
+  font-weight: 200;  
+  text-shadow: 2px 2px 10px rgba(0,0,0,0.3);  
+  background: linear-gradient(45deg, #fff, #f0f0f0);  
+  -webkit-background-clip: text;  
+  -webkit-text-fill-color: transparent;  
+  background-clip: text;  
+}  
+
+.condition {  
+  font-size: 1.5em;  
+  margin-bottom: 30px;  
+  opacity: 0.9;  
+  text-transform: capitalize;  
+  position: relative;  
+  z-index: 1;  
+}  
+
+.weather-details {  
+  display: grid;  
+  grid-template-columns: repeat(auto-fit, minmax(150px, 1fr));  
+  gap: 20px;  
+  position: relative;  
+  z-index: 1;  
+}  
+
+.detail-item {  
+  background: rgba(255,255,255,0.2);  
+  padding: 20px;  
+  border-radius: 15px;  
+  backdrop-filter: blur(10px);  
+  border: 1px solid rgba(255,255,255,0.3);  
+  transition: all 0.3s ease;  
+  position: relative;  
+  overflow: hidden;  
+}  
+
+.detail-item:hover {  
+  transform: translateY(-5px);  
+  background: rgba(255,255,255,0.25);  
+  box-shadow: 0 10px 25px rgba(0,0,0,0.2);  
+}  
+
+.detail-item::before {  
+  content: '';  
+  position: absolute;  
+  top: 0;  
+  left: -100%;  
+  width: 100%;  
+  height: 100%;  
+  background: linear-gradient(90deg, transparent, rgba(255,255,255,0.2), transparent);  
+  transition: left 0.5s ease;  
+}  
+
+.detail-item:hover::before {  
+  left: 100%;  
+}  
+
+.detail-icon {  
+  font-size: 2em;  
+  margin-bottom: 10px;  
+  display: block;  
+}  
+
+.detail-label {  
+  font-size: 0.9em;  
+  opacity: 0.8;  
+  margin-bottom: 5px;  
+}  
+
+.detail-value {  
+  font-size: 1.3em;  
+  font-weight: bold;  
+}  
+
+.loading {  
+  font-size: 1.3em;  
+  opacity: 0.8;  
+  animation: pulse 2s infinite;  
+}  
+
+@keyframes pulse {  
+  0%, 100% { opacity: 0.8; }  
+  50% { opacity: 1; }  
+}  
+
+.error {  
+  color: #ff6b6b;  
+  font-size: 1.2em;  
+  text-shadow: 2px 2px 4px rgba(0,0,0,0.3);  
+}  
+
+.last-updated {  
+  margin-top: 20px;  
+  font-size: 0.9em;  
+  opacity: 0.7;  
+  position: relative;  
+  z-index: 1;  
+}  
+
+@media (max-width: 768px) {  
+  .weather-card {  
+    min-width: auto;  
+    width: 100%;  
+    padding: 30px;  
+    margin: 20px;  
+  }  
+    
+  .header h1 {  
+    font-size: 2em;  
+  }  
+    
+  .weather-main {  
+    flex-direction: column;  
+    gap: 20px;  
+  }  
+    
+  .temperature {  
+    font-size: 3.5em;  
+  }  
+    
+  .weather-icon {  
+    font-size: 4em;  
+  }  
+}
+
+  </style>  
+</head>  
+<body>  
+  <div class="weather-bg"></div>  
+  <div class="container">  
+    <div class="weather-card">  
+      <div class="header">  
+        <h1>🌤 Smart Wetter</h1>  
+        <div class="status" id="status">Wetterdaten werden geladen...</div>  
+      </div>  <div id="weather-content" style="display: none;">  
+    <div class="weather-main">  
+      <div class="weather-icon" id="weather-icon">🌤</div>  
+      <div class="temperature" id="temperature">--°</div>  
+    </div>  
+      
+    <div class="condition" id="condition">--</div>  
+      
+    <div class="weather-details">  
+      <div class="detail-item">  
+        <div class="detail-icon">💧</div>  
+        <div class="detail-label">Luftfeuchtigkeit</div>  
+        <div class="detail-value" id="humidity">--%</div>  
+      </div>  
+        
+      <div class="detail-item">  
+        <div class="detail-icon">🌬</div>  
+        <div class="detail-label">Windgeschwindigkeit</div>  
+        <div class="detail-value" id="wind">-- km/h</div>  
+      </div>  
+        
+      <div class="detail-item">  
+        <div class="detail-icon">🌡</div>  
+        <div class="detail-label">Gefühlt wie</div>  
+        <div class="detail-value" id="feels-like">--°</div>  
+      </div>  
+        
+      <div class="detail-item">  
+        <div class="detail-icon">👁</div>  
+        <div class="detail-label">Sichtweite</div>  
+        <div class="detail-value" id="visibility">-- km</div>  
+      </div>  
+    </div>  
+      
+    <div class="last-updated" id="last-updated"></div>  
+  </div>  
+</div>
+
+  </div>    <script>  
+    const API_KEY = "95c40172bf714c18aa8160716250607";  
+    const LAT = 54.1515;  
+    const LON = 13.5102;  
+  
+    function getWeatherIcon(condition) {  
+      const iconMap = {  
+        'sunny': '☀️',  
+        'clear': '🌙',  
+        'partly cloudy': '⛅',  
+        'cloudy': '☁️',  
+        'overcast': '☁️',  
+        'mist': '🌫',  
+        'fog': '🌫',  
+        'rain': '🌧',  
+        'drizzle': '🌦',  
+        'light rain': '🌦',  
+        'heavy rain': '🌧',  
+        'snow': '❄️',  
+        'sleet': '🌨',  
+        'thunderstorm': '⛈',  
+        'thunder': '⛈'  
+      };  
+        
+      const conditionLower = condition.toLowerCase();  
+      for (const [key, icon] of Object.entries(iconMap)) {  
+        if (conditionLower.includes(key)) {  
+          return icon;  
+        }  
+      }  
+      return '🌤';  
+    }  
+  
+    async function fetchWeather() {  
+      const url = `https://api.weatherapi.com/v1/current.json?key=${API_KEY}&q=${LAT},${LON}&lang=de`;  
+      try {  
+        const response = await fetch(url);  
+        if (!response.ok) throw new Error("Netzwerkantwort nicht OK");  
+        const data = await response.json();  
+  
+        const location = data.location.name + ", " + data.location.region;  
+        const temp = Math.round(data.current.temp_c);  
+        const condition = data.current.condition.text;  
+        const humidity = data.current.humidity;  
+        const wind = Math.round(data.current.wind_kph);  
+        const feelsLike = Math.round(data.current.feelslike_c);  
+        const visibility = data.current.vis_km;  
+  
+        // Update UI  
+        document.getElementById("status").textContent = `📍 ${location}`;  
+        document.getElementById("temperature").textContent = `${temp}°`;  
+        document.getElementById("condition").textContent = condition;  
+        document.getElementById("humidity").textContent = `${humidity}%`;  
+        document.getElementById("wind").textContent = `${wind} km/h`;  
+        document.getElementById("feels-like").textContent = `${feelsLike}°`;  
+        document.getElementById("visibility").textContent = `${visibility} km`;  
+        document.getElementById("weather-icon").textContent = getWeatherIcon(condition);  
+        document.getElementById("last-updated").textContent = `Letzte Aktualisierung: ${new Date().toLocaleTimeString('de-DE')}`;  
+  
+        // Show weather content  
+        document.getElementById("weather-content").style.display = "block";  
+  
+        // Update background based on weather  
+        updateBackground(condition);  
+  
+      } catch (error) {  
+        document.getElementById("status").innerHTML = '<div class="error">❌ Fehler beim Laden der Wetterdaten</div>';  
+        console.error(error);  
+      }  
+    }  
+  
+    function updateBackground(condition) {  
+      const body = document.body;  
+      const conditionLower = condition.toLowerCase();  
+        
+      if (conditionLower.includes('sunny') || conditionLower.includes('clear')) {  
+        body.style.background = 'linear-gradient(135deg, #667eea 0%, #764ba2 100%)';  
+      } else if (conditionLower.includes('rain') || conditionLower.includes('drizzle')) {  
+        body.style.background = 'linear-gradient(135deg, #4b6cb7 0%, #182848 100%)';  
+      } else if (conditionLower.includes('snow')) {  
+        body.style.background = 'linear-gradient(135deg, #e6ddd4 0%, #d5d4d0 100%)';  
+      } else if (conditionLower.includes('cloud')) {  
+        body.style.background = 'linear-gradient(135deg, #bdc3c7 0%, #2c3e50 100%)';  
+      } else if (conditionLower.includes('thunder')) {  
+        body.style.background = 'linear-gradient(135deg, #232526 0%, #414345 100%)';  
+      }  
+    }  
+  
+    // Initial load  
+    fetchWeather();  
+  
+    // Auto-refresh every 5 minutes  
+    setInterval(fetchWeather, 300000);  
+  </script>  </body>  
+</html>
